@@ -5959,7 +5959,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rustdesk-portable-packer"
+name = "mydesk"
 version = "1.4.0"
 dependencies = [
  "brotli",
