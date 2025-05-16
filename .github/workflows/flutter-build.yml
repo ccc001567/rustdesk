@@ -1,4 +1,4 @@
-name: Build the flutter version of the RustDesk
+name: Build the flutter version of the MyDesk
 
 on:
   workflow_call:
@@ -173,7 +173,7 @@ jobs:
           Expand-Archive usbmmidd_v2.zip -DestinationPath .
           Remove-Item -Path usbmmidd_v2\Win32 -Recurse
           Remove-Item -Path "usbmmidd_v2\deviceinstaller64.exe", "usbmmidd_v2\deviceinstaller.exe", "usbmmidd_v2\usbmmidd.bat"
-          mv -Force .\usbmmidd_v2 ./rustdesk
+          mv -Force .\usbmmidd_v2 ./mydesk
 
           # Download printer driver files and extract them to ./rustdesk
           try {
@@ -189,8 +189,8 @@ jobs:
             if ($checksum_driver -eq $downloadsum_driver.Hash -and $checksum_dll -eq $downloadsum_dll.Hash) {
                 Write-Output "rustdesk_printer_driver_v4, checksums match, extract the file."
                 Expand-Archive rustdesk_printer_driver_v4.zip -DestinationPath .
-                mkdir ./rustdesk/drivers
-                mv -Force .\rustdesk_printer_driver_v4 ./rustdesk/drivers/RustDeskPrinterDriver
+                mkdir ./mydesk/drivers
+                mv -Force .\rustdesk_printer_driver_v4 ./mydesk/drivers/MyDeskPrinterDriver
                 Expand-Archive printer_driver_adapter.zip -DestinationPath .
                 mv -Force .\printer_driver_adapter.dll ./rustdesk
             } elseif ($checksum_driver -ne $downloadsum_driver.Hash) {
@@ -223,13 +223,13 @@ jobs:
         if: ${{ inputs.upload-artifact }}
         with:
           name: topmostwindow-artifacts
-          path: "./rustdesk"
+          path: "./mydesk"
 
       - name: Upload unsigned
         if: env.UPLOAD_ARTIFACT == 'true'
         uses: actions/upload-artifact@master
         with:
-          name: rustdesk-unsigned-windows-${{ matrix.job.arch }}
+          name: mydesk-unsigned-windows-${{ matrix.job.arch }}
           path: rustdesk
 
       - name: Sign rustdesk files
@@ -237,7 +237,7 @@ jobs:
         shell: bash
         run: |
           pip3 install requests argparse
-          BASE_URL=${{ secrets.SIGN_BASE_URL }} SECRET_KEY=${{ secrets.SIGN_SECRET_KEY }} python3 res/job.py sign_files ./rustdesk/
+          BASE_URL=${{ secrets.SIGN_BASE_URL }} SECRET_KEY=${{ secrets.SIGN_SECRET_KEY }} python3 res/job.py sign_files ./mydesk/
 
       - name: Build self-extracted executable
         shell: bash
@@ -246,7 +246,7 @@ jobs:
           sed -i '/dpiAware/d' res/manifest.xml
           pushd ./libs/portable
           pip3 install -r requirements.txt
-          python3 ./generate.py -f ../../mydesk/ -o . -e ../../rustdesk/mydesk.exe
+          python3 ./generate.py -f ../../mydesk/ -o . -e ../../mydesk/mydesk.exe
           popd
           mkdir -p ./SignOutput
           mv ./target/release/rustdesk-portable-packer.exe ./SignOutput/mydesk-${{ env.VERSION }}-${{ matrix.job.arch }}.exe 
@@ -260,6 +260,7 @@ jobs:
           python preprocess.py --arp -d ../../mydesk
           nuget restore msi.sln
           msbuild msi.sln -p:Configuration=Release -p:Platform=x64 /p:TargetVersion=Windows10
+          /p:DefineConstants="Product=mydesk;ProductLower=mydesk;RegKeyRoot=Software\\mydesk;Version=${{ env.VERSION }};Manufacturer=MyDesk;UpgradeCode={YOUR_GUID_HERE};Description=MyDesk Remote Desktop"
           mv ./Package/bin/x64/Release/en-us/Package.msi ../../SignOutput/mydesk-${{ env.VERSION }}-${{ matrix.job.arch }}.msi  # 修改这里
           sha256sum ../../SignOutput/mydesk-*.msi
 
