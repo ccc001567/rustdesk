@@ -260,7 +260,6 @@ jobs:
           python preprocess.py --arp -d ../../mydesk
           nuget restore msi.sln
           msbuild msi.sln -p:Configuration=Release -p:Platform=x64 /p:TargetVersion=Windows10
-          /p:DefineConstants="Product=mydesk;ProductLower=mydesk;RegKeyRoot=Software\\mydesk;Version=${{ env.VERSION }};Manufacturer=MyDesk;UpgradeCode={YOUR_GUID_HERE};Description=MyDesk Remote Desktop"
           mv ./Package/bin/x64/Release/en-us/Package.msi ../../SignOutput/mydesk-${{ env.VERSION }}-${{ matrix.job.arch }}.msi  # 修改这里
           sha256sum ../../SignOutput/mydesk-*.msi
 
