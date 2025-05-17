@@ -256,6 +256,18 @@ jobs:
       - name: Build msi
         if: env.UPLOAD_ARTIFACT == 'true'
         run: |
+            msbuild res/msi/Package/Package.wixproj `
+                /p:Configuration=Release `
+                /p:Platform=x64 `
+                /p:Product="MyDesk" `
+                /p:ProductLower="mydesk" `
+                /p:Version="${{ env.VERSION }}" `
+                /p:Manufacturer="MyCompany" `
+                /p:UpgradeCode="PUT-YOUR-GUID-HERE" `
+                /p:BuildDate="$(Get-Date -Format yyyyMMdd)" `
+                /p:Description="MyDesk Remote Control" `
+                /p:RegKeyRoot="Software\\MyDesk" `
+                /p:BuildDir="D:\\a\\rustdesk\\rustdesk\\flutter\\build\\windows\\x64\\runner\\Release"
           pushd ./res/msi
           python preprocess.py --arp -d ../../mydesk
           nuget restore msi.sln

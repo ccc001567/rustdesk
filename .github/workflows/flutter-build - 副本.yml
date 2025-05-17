@@ -421,7 +421,7 @@ jobs:
           prerelease: true
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            ./SignOutput/rustdesk-*.exe
+            ./SignOutput/mydesk-*.exe
 
   build-for-macOS-arm64-selfhost:
     # use build-for-macOS instead
